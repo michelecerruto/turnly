@@ -28,9 +28,13 @@ zip -r "turnly-$(sed -n 's/.*"version": "\(.*\)".*/\1/p' manifest.json).zip" man
 > • Works through resizes, fullscreen, layout changes, people leaving and rejoining.
 > • Faces stay visible: with the camera on, the check stays in the corner.
 >
+> Works best when everyone in the stand-up installs it: each person sees the same order and ticks speakers off on their own screen.
+>
 > Private by design: Turnly runs only on meet.google.com, makes no network requests, and keeps its data on your device.
 >
-> Turnly is open source. Google Meet is a trademark of Google LLC; Turnly is not affiliated with Google.
+> Turnly is open source: https://github.com/michelecerruto/turnly
+>
+> Google Meet is a trademark of Google LLC. Turnly is not affiliated with Google.
 
 **Category:** Productivity → Workflow & Planning
 
@@ -56,7 +60,9 @@ zip -r "turnly-$(sed -n 's/.*"version": "\(.*\)".*/\1/p' manifest.json).zip" man
 
 **Data usage:** Turnly reads participant display names shown in Meet and stores them only on the user's device, together with the done marks. Nothing is transmitted off the device, sold, or used for any other purpose. Check the form's own definitions when answering the data category questions, then tick all three certifications.
 
-**Privacy policy URL:** https://github.com/michelecerruto/turnly/blob/main/PRIVACY.md
+**Privacy policy URL:** https://michelecerruto.github.io/turnly/PRIVACY.html (GitHub Pages; github.com file pages fail the store's link check)
+
+**Homepage URL:** https://michelecerruto.github.io/turnly/
 
 ## Account
 
