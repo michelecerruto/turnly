@@ -1,0 +1,180 @@
+:host {
+  font: 500 13px/1.2 "Google Sans", Roboto, system-ui, sans-serif;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.toggle {
+  pointer-events: auto;
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgb(255 255 255 / 0.85);
+  border-radius: 50%;
+  background: rgb(32 33 36 / 0.55);
+  cursor: pointer;
+}
+
+.toggle svg {
+  width: 100%;
+  height: 100%;
+  fill: rgb(255 255 255 / 0.35);
+}
+
+.toggle:hover svg,
+.is-done .toggle svg {
+  fill: #fff;
+}
+
+.is-done .toggle {
+  border-color: #1e8e3e;
+  background: #1e8e3e;
+}
+
+.toggle:focus-visible,
+.reset:focus-visible {
+  outline: 2px solid #8ab4f8;
+  outline-offset: 2px;
+}
+
+/* Video tile */
+
+.tile {
+  border-radius: 12px;
+}
+
+.tile.is-next {
+  box-shadow: inset 0 0 0 2px #fbbc04;
+}
+
+.tile .toggle {
+  top: 10px;
+  left: 10px;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  border-radius: inherit;
+  background: rgb(32 33 36 / 0.4);
+}
+
+.tile.is-done .veil {
+  display: grid;
+}
+
+.veil svg {
+  width: clamp(32px, 30%, 96px);
+  height: auto;
+  fill: #81c995;
+}
+
+/* Keep faces visible: with the camera on, the corner toggle alone shows the done state. */
+.tile.has-video .veil svg {
+  display: none;
+}
+
+.up-next {
+  position: absolute;
+  top: 15px;
+  left: 50px;
+  display: none;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fbbc04;
+  color: #202124;
+  font-size: 12px;
+}
+
+.tile.is-next .up-next {
+  display: block;
+}
+
+/* People-panel row: the toggle sits exactly over the 32px avatar */
+
+.row .toggle {
+  inset: 0;
+  padding: 5px;
+}
+
+.row:not(.is-done) .toggle {
+  border-color: rgb(255 255 255 / 0.5);
+  background: transparent;
+}
+
+.row:not(.is-done) .toggle svg {
+  fill: transparent;
+}
+
+.row:not(.is-done) .toggle:hover {
+  background: rgb(32 33 36 / 0.55);
+}
+
+.row:not(.is-done) .toggle:hover svg {
+  fill: #fff;
+}
+
+.row.is-next .toggle {
+  border-color: #fbbc04;
+}
+
+/* Floating panel */
+
+.panel {
+  position: fixed;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: rgb(32 33 36 / 0.92);
+  color: #e8eaed;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.4);
+  white-space: nowrap;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panel.is-dragging {
+  cursor: grabbing;
+}
+
+.progress {
+  color: #81c995;
+  font-variant-numeric: tabular-nums;
+}
+
+.next {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reset {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: rgb(255 255 255 / 0.2);
+}
