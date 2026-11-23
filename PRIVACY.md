@@ -1,6 +1,6 @@
 # Privacy policy
 
-Turnly is a Chrome extension that helps teams take turns in Google Meet stand-ups. It is built to keep everything on your device.
+Turnly is a browser extension for Chrome and Firefox that helps teams take turns in Google Meet stand-ups. It is built to keep everything on your device.
 
 ## What Turnly reads
 
@@ -8,7 +8,7 @@ While you are in a meeting on `https://meet.google.com`, Turnly reads what Meet 
 
 ## What Turnly stores
 
-Turnly saves two things in Chrome's extension storage (`chrome.storage.local`) on your computer:
+Turnly saves two things in the browser's extension storage (`chrome.storage.local`) on your computer:
 
 - **Done marks:** for each meeting, the participant ids and display names you marked as done today. Marks from previous days are deleted automatically.
 - **Panel position:** where you dragged the floating panel.

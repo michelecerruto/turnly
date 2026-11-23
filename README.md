@@ -49,7 +49,7 @@ Turnly is not on Firefox Add-ons yet. To install it from source:
 4. Open `about:addons`, select Turnly, and under **Permissions** make sure access to `meet.google.com` is on.
 5. Join a meeting on [meet.google.com](https://meet.google.com), or reload the tab if you are already in one.
 
-Firefox removes temporary add-ons when it quits, so repeat steps 2 and 3 after each restart. Requires Firefox 128 or newer.
+Firefox removes temporary add-ons when it quits, so repeat steps 2 and 3 after each restart. Requires Firefox 140 or newer.
 
 ## Use it as a team
 

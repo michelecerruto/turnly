@@ -7,8 +7,10 @@ Thanks for helping. This guide covers the setup, the structure, and what a good 
 There is no build step and there are no dependencies.
 
 1. Clone the repository.
-2. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the repository folder.
-3. After every change, click the reload icon on the extension card **and** reload the Meet tab. Content scripts are not replaced in tabs that are already open.
+2. Load the extension:
+   - **Chrome:** open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the repository folder.
+   - **Firefox:** open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**, and select `manifest.json`. Alternatively, `npx web-ext run` opens a clean Firefox profile with the add-on loaded and reloads it on every change.
+3. After every change, reload the extension (the reload icon on the Chrome card, or **Reload** in `about:debugging`) **and** reload the Meet tab. Content scripts are not replaced in tabs that are already open.
 
 To test with several participants, join the same meeting from a second browser profile or an incognito window.
 
@@ -16,7 +18,7 @@ To test with several participants, join the same meeting from a second browser p
 
 ```
 manifest.json         Extension manifest (MV3)
-icons/                Logo source (logo.svg) and the PNG sizes Chrome needs
+icons/                Logo source (logo.svg) and the PNG sizes the browsers need
 src/
   content.js          Classic content script; only loads main.js as an ES module
   main.js             Entry point: the per-frame loop that ties everything together
@@ -31,7 +33,7 @@ src/
 
 ## Principles
 
-- **No dependencies, no build step.** Plain ES modules that Chrome runs as-is.
+- **No dependencies, no build step.** Plain ES modules that the browser runs as-is.
 - **Minimal permissions.** Only `storage`. Changes that need more permissions or any network access need a strong reason.
 - **Never restyle or move Meet's own elements.** Add decorations inside Shadow DOM, and stop event propagation where Meet would react to our clicks.
 - **Small, clear code over clever code.** Keep each module to one responsibility, name things for what they do, and comment only the non-obvious *why*.
@@ -84,4 +86,4 @@ Meet can't be driven by automated tests reliably, so please run through this bef
 
 ## Reporting bugs
 
-Open an issue with your Chrome version, what you did, what you expected, what happened, a screenshot, and the console snippet output above.
+Open an issue with your browser and its version, what you did, what you expected, what happened, a screenshot, and the console snippet output above.
