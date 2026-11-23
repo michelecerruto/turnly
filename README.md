@@ -26,7 +26,11 @@ Every daily stand-up has the same moment: someone finishes, and nobody remembers
 
 ## Install
 
-Turnly is not on the Chrome Web Store yet. To install it from source:
+### Chrome
+
+Install Turnly from the [Chrome Web Store](https://chromewebstore.google.com/detail/turnly/hcccakeknmcdkoieigkpjnbfbomcjdej).
+
+To install it from source instead:
 
 1. Download or clone this repository.
 2. Open `chrome://extensions` and enable **Developer mode**.
@@ -34,6 +38,18 @@ Turnly is not on the Chrome Web Store yet. To install it from source:
 4. Join a meeting on [meet.google.com](https://meet.google.com).
 
 Requires Chrome 121 or newer (or another Chromium browser of the same version).
+
+### Firefox
+
+Turnly is not on Firefox Add-ons yet. To install it from source:
+
+1. Download or clone this repository.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. Click **Load Temporary Add-on…** and select `manifest.json` in the repository folder.
+4. Open `about:addons`, select Turnly, and under **Permissions** make sure access to `meet.google.com` is on.
+5. Join a meeting on [meet.google.com](https://meet.google.com), or reload the tab if you are already in one.
+
+Firefox removes temporary add-ons when it quits, so repeat steps 2 and 3 after each restart. Requires Firefox 128 or newer.
 
 ## Use it as a team
 
