@@ -12,14 +12,14 @@ const TOGGLE_BUTTON = `<button class="toggle" type="button">${CHECK_ICON}</butto
 const MARKUP = {
   tile: `
     <div class="overlay tile">
-      <div class="veil">${CHECK_ICON}</div>
+      <div class="veil"></div>
       ${TOGGLE_BUTTON}
       <span class="up-next">Up next</span>
     </div>`,
   row: `<div class="overlay row">${TOGGLE_BUTTON}</div>`,
 };
 
-/** @type {Map<Element, { host: HTMLElement, el: Element, button: HTMLButtonElement, id?: string, name?: string }>} */
+/** @type {Map<Element, { host: HTMLElement, el: Element, button: HTMLButtonElement, name?: string }>} */
 const overlays = new Map();
 
 /**
@@ -27,22 +27,27 @@ const overlays = new Map();
  *
  * @param {import('./participants.js').Participant[]} participants
  * @param {object} state
- * @param {(id: string) => boolean} state.isDone
- * @param {string} [state.nextId] participant who speaks next
- * @param {(id: string, name: string) => void} state.onToggle
+ * @param {(name: string) => boolean} state.isDone
+ * @param {string} [state.nextName] name of who speaks next
+ * @param {(name: string) => void} state.onToggle
  */
-export function renderOverlays(participants, { isDone, nextId, onToggle }) {
+export function renderOverlays(participants, { isDone, nextName, onToggle }) {
   const mounted = new Set();
   for (const participant of participants) {
     mounted.add(participant.mount);
     const overlay = overlays.get(participant.mount) ?? createOverlay(participant, onToggle);
-    updateOverlay(overlay, participant, isDone(participant.id), participant.id === nextId);
+    updateOverlay(overlay, participant, isDone(participant.name), participant.name === nextName);
   }
   for (const [mount, overlay] of overlays) {
     if (mounted.has(mount)) continue;
     overlay.host.remove();
     overlays.delete(mount);
   }
+}
+
+export function clearOverlays() {
+  for (const overlay of overlays.values()) overlay.host.remove();
+  overlays.clear();
 }
 
 function createOverlay({ kind, mount }, onToggle) {
@@ -55,18 +60,19 @@ function createOverlay({ kind, mount }, onToggle) {
   for (const type of ['pointerdown', 'mousedown', 'click']) {
     overlay.button.addEventListener(type, (event) => event.stopPropagation());
   }
-  overlay.button.addEventListener('click', () => onToggle(overlay.id, overlay.name));
+  overlay.button.addEventListener('click', () => onToggle(overlay.name));
   overlays.set(mount, overlay);
   return overlay;
 }
 
-function updateOverlay(overlay, { mount, id, name, hasVideo = false }, isDone, isNext) {
+function updateOverlay(overlay, { mount, name, hasVideo = false }, isDone, isNext) {
   // Meet re-renders tiles and can drop foreign children; put the overlay back if so.
   if (overlay.host.parentElement !== mount) mount.append(overlay.host);
-  Object.assign(overlay, { id, name });
+  overlay.name = name;
   overlay.el.classList.toggle('is-done', isDone);
   overlay.el.classList.toggle('is-next', isNext);
   overlay.el.classList.toggle('has-video', hasVideo);
   const title = isDone ? `Undo ${name}` : `Mark ${name} as done`;
   if (overlay.button.title !== title) overlay.button.title = title;
+  if (overlay.button.ariaPressed !== String(isDone)) overlay.button.ariaPressed = String(isDone);
 }

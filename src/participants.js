@@ -18,21 +18,15 @@ const MAX_NAME_LENGTH = 80;
 const ICON_FONT = /material|icons|symbols/i;
 const VISIBLE = { opacityProperty: true, visibilityProperty: true };
 
-/** @type {WeakMap<Element, { id: string, name: string }>} */
-const nameCache = new WeakMap();
+/** @type {WeakMap<Element, { id: string, node: Text }>} */
+const nameNodes = new WeakMap();
 
-/**
- * @returns {{ tiles: Participant[], rows: Participant[], presentIds: Set<string> }}
- *   `presentIds` includes people whose tile is off-screen, so rejoin detection never
- *   mistakes them for someone who left.
- */
+/** @returns {{ tiles: Participant[], rows: Participant[] }} */
 export function scanParticipants() {
   const tiles = [];
   const rows = [];
-  const presentIds = new Set();
   for (const el of document.querySelectorAll(PARTICIPANT_SELECTOR)) {
     const id = el.getAttribute('data-participant-id');
-    presentIds.add(id);
     if (el.getAttribute('role') === 'listitem') {
       const row = toRow(el, id);
       if (row) rows.push(row);
@@ -41,12 +35,16 @@ export function scanParticipants() {
       if (tile) tiles.push(tile);
     }
   }
-  return { tiles, rows, presentIds };
+  return { tiles, rows };
 }
 
-/** Keeps the first entry per participant id; tiles come first, so their names win. */
-export function uniqueById(participants) {
-  return [...new Map(participants.map((participant) => [participant.id, participant])).values()];
+/** Keeps the first participant per `key`; tiles come before list rows, so tiles win. */
+export function uniqueBy(participants, key) {
+  const seen = new Map();
+  for (const participant of participants) {
+    if (!seen.has(participant[key])) seen.set(participant[key], participant);
+  }
+  return [...seen.values()];
 }
 
 function toTile(el, id) {
@@ -72,28 +70,33 @@ function toRow(el, id) {
   return avatar && name ? { kind: 'row', id, name, mount: avatar } : null;
 }
 
+/**
+ * Caches the name's text node rather than its text: Meet reuses a tile for another person by
+ * changing its id before its label, so a cached string would stick to the wrong person.
+ */
 function participantName(el, id) {
-  const cached = nameCache.get(el);
-  if (cached?.id === id) return cached.name;
-  const name = readName(el);
-  if (name) nameCache.set(el, { id, name });
-  return name;
+  const cached = nameNodes.get(el);
+  if (cached?.id === id && el.contains(cached.node)) return cached.node.textContent.trim();
+  const node = findNameNode(el);
+  if (!node) return '';
+  nameNodes.set(el, { id, node });
+  return node.textContent.trim();
 }
 
 /**
  * Meet marks display names `notranslate`; falls back to the first visible label text.
  * Icon ligatures (e.g. "mic_off") are skipped by their icon font.
  */
-function readName(el) {
+function findNameNode(el) {
   for (const scope of [...el.querySelectorAll('.notranslate'), el]) {
     const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      const text = node.textContent.trim();
-      if (text.length < 2 || text.length > MAX_NAME_LENGTH) continue;
-      if (isLabel(node.parentElement, el)) return text;
+      const length = node.textContent.trim().length;
+      if (length < 2 || length > MAX_NAME_LENGTH) continue;
+      if (isLabel(node.parentElement, el)) return node;
     }
   }
-  return '';
+  return null;
 }
 
 function isLabel(el, container) {

@@ -4,7 +4,7 @@ Thanks for helping. This guide covers the setup, the structure, and what a good 
 
 ## Setup
 
-There is no build step and there are no dependencies.
+The extension has no build step and no dependencies. Its tests run on Node 20 or newer with `node --test`. The sync server in `server/` uses Wrangler, Cloudflare's CLI, and needs Node 22.
 
 1. Clone the repository.
 2. Load the extension:
@@ -19,23 +19,32 @@ To test with several participants, join the same meeting from a second browser p
 ```
 manifest.json         Extension manifest (MV3)
 icons/                Logo source (logo.svg) and the PNG sizes the browsers need
+popup/                Toolbar popup: turns Turnly on or off for the current meeting
 src/
   content.js          Classic content script; only loads main.js as an ES module
-  main.js             Entry point: the per-frame loop that ties everything together
+  main.js             Entry point: the per-frame loop, keyboard shortcut, and popup messages
   participants.js     Reads tiles and People-panel rows from Meet's DOM
-  marks.js            Done marks per meeting and day, persistence, rejoin handling
-  order.js            Daily speaking order shared by every attendee
+  meeting.js          The current meeting's state: offline copy, sync, names to hashed tokens
+  room-state.js       Room state and the changes attendees make; shared with the server
+  sync.js             WebSocket connection to the meeting's room, with offline queue
+  order.js            Speaking order: daily shuffle, first/last/skip rules, manual order
   overlays.js         Check buttons, veil, and "Up next" border inside tiles and rows
-  panel.js            Floating progress panel: placement, dragging, fullscreen
+  panel.js            Floating bar and queue list: placement, dragging, fullscreen
   shadow.js           Loads the stylesheet once and creates styled shadow roots
   styles.css          All styles, scoped inside the shadow roots
+server/
+  src/index.js        Cloudflare Worker and the Room Durable Object
+  wrangler.toml       Worker configuration
+test/                 Unit tests for order.js and room-state.js (`node --test`)
 ```
 
 ## Principles
 
 - **No dependencies, no build step.** Plain ES modules that the browser runs as-is.
-- **Minimal permissions.** Only `storage`. Changes that need more permissions or any network access need a strong reason.
+- **Minimal permissions and data.** Only `storage`. Nothing readable leaves the browser: names and meeting codes are hashed before they reach the sync server. Changes that need more permissions or send more data need a strong reason.
+- **One source of truth for the room.** Every change to shared state goes through `applyChange` in `room-state.js`, which both the extension and the server run.
 - **Never restyle or move Meet's own elements.** Add decorations inside Shadow DOM, and stop event propagation where Meet would react to our clicks.
+- **Never put participant names into `innerHTML`.** Display names are chosen by other people; set them with `textContent`.
 - **Small, clear code over clever code.** Keep each module to one responsibility, name things for what they do, and comment only the non-obvious *why*.
 
 ## Meet DOM contract
@@ -64,18 +73,39 @@ When you report a breakage, the output of this snippet in the DevTools console (
 
 ## Manual test checklist
 
-Meet can't be driven by automated tests reliably, so please run through this before opening a pull request:
+Meet can't be driven by automated tests reliably, so run `node --test`, then run through this before opening a pull request:
 
+- [ ] Turnly stays hidden in a new meeting until turned on from the toolbar popup, and stays on after a reload
+- [ ] Two attendees with Turnly on: a mark, Done, move, first/last/skip and Reset on one screen appear on the other within a second, and the panel dot is green
+- [ ] Offline (disconnect the network): marks still work, the dot turns grey, and they reach the others after reconnecting
+- [ ] Fresh server (`wrangler dev` with a new `--persist-to` folder): attendees keep their marks and rules, and the room is seeded from them
 - [ ] Marking and unmarking from a tile, and from the People panel (Contributors and Raised hands)
 - [ ] "Up next" border, label, and panel text follow the daily order
+- [ ] **Done** and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> mark the next speaker; the shortcut does nothing while typing in the chat
+- [ ] Queue list: move up/down, Always first/last, Skip and Unskip
+- [ ] Reset, then Undo within five seconds
 - [ ] Resize the window, open and close side panels, switch layouts
 - [ ] Fullscreen: panel visible, Reset and dragging work
 - [ ] Drag the panel, double-click to snap back, reload and check the position is kept
 - [ ] A participant leaves and rejoins: their mark is kept
-- [ ] Two participants with the same name are marked independently
-- [ ] Camera on: no large check over the face
+- [ ] Camera on: the tile is not dimmed when marked done
 - [ ] Meet menus and popups (Gemini, "More options") appear above the overlays
-- [ ] No errors from the extension in the DevTools console
+- [ ] No errors from the extension in the DevTools console, apart from WebSocket connection errors while offline
+
+## Sync server
+
+The server is a Cloudflare Worker in `server/`. Each meeting is a room (a Durable Object) that applies changes with `room-state.js` and sends the new state to everyone connected.
+
+```sh
+cd server
+nvm use             # Node 22
+npm install
+npm run dev         # local server on http://localhost:8787
+```
+
+To try the extension against the local server, point `SERVER_URL` in `src/sync.js` to `ws://localhost:8787` and reload the extension.
+
+To deploy, log in once with `npx wrangler login`, then run `npm run deploy`. Wrangler prints the Worker's address (`https://turnly.<your-subdomain>.workers.dev`); `SERVER_URL` must be the same address with `wss://`.
 
 ## Pull requests
 
